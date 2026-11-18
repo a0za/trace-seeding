@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>細胞濃度・播種量の計算 | TЯace</title>
+<title>Cell Seeding Calculator | TЯace</title>
 <style>
-:root { font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif; color: #183029; background: #edf1ed; }
+:root { font: 16px/1.55 -apple-system, BlinkMacSystemFont, sans-serif; color: #183029; background: #edf1ed; }
 * { box-sizing: border-box; }
 body { margin: 0; }
 header { background: #153b2e; color: #fff; }
@@ -54,35 +54,35 @@ article { padding: 12px; border: 1px solid #d9e3db; border-radius: 10px; break-i
 </style>
 </head>
 <body>
-<header><div class="shell"><div><span class="brand">TЯace</span><h1>細胞濃度・播種量の計算</h1></div><button id="print" type="button" disabled>印刷 / PDF</button></div></header>
+<header><div class="shell"><div><span class="brand">TЯace</span><h1>Cell Seeding Calculator</h1></div><button id="print" type="button" disabled>Print / PDF</button></div></header>
 <main class="shell">
   <section aria-labelledby="measurement-title">
-    <h2 id="measurement-title">細胞濃度</h2>
-    <p class="muted">ノイバウエル計算盤の大区画（1 mm²、深さ 0.1 mm）</p>
+    <h2 id="measurement-title">Cell Concentration</h2>
+    <p class="muted">Neubauer hemocytometer: large squares (1 mm², 0.1 mm deep)</p>
     <div class="measurement">
       <div class="counts">
-        <label>区画 1<input id="count-1" inputmode="numeric" autocomplete="off"></label>
-        <label>区画 2<input id="count-2" inputmode="numeric" autocomplete="off"></label>
-        <label>区画 3<input id="count-3" inputmode="numeric" autocomplete="off"></label>
-        <label>区画 4<input id="count-4" inputmode="numeric" autocomplete="off"></label>
+        <label>Square 1<input id="count-1" inputmode="numeric" autocomplete="off"></label>
+        <label>Square 2<input id="count-2" inputmode="numeric" autocomplete="off"></label>
+        <label>Square 3<input id="count-3" inputmode="numeric" autocomplete="off"></label>
+        <label>Square 4<input id="count-4" inputmode="numeric" autocomplete="off"></label>
       </div>
-      <label>希釈倍率（×）<input id="dilution" inputmode="decimal" value="2"></label>
-      <div class="metric"><p class="muted">細胞懸濁液（原液）の濃度</p><output id="concentration">—</output></div>
+      <label>Dilution factor (×)<input id="dilution" inputmode="decimal" value="2"></label>
+      <div class="metric"><p class="muted">Stock cell concentration</p><output id="concentration">—</output></div>
     </div>
     <p id="measurement-note" class="muted"></p>
   </section>
   <section aria-labelledby="destinations-title">
-    <h2 id="destinations-title">播種先</h2>
-    <div id="vessels" class="actions" aria-label="播種先を追加"></div>
-    <p id="empty" class="muted">容器を選ぶと、1 dish・1 well あたりの原液量と培地量を計算します。</p>
+    <h2 id="destinations-title">Seeding Destinations</h2>
+    <div id="vessels" class="actions" aria-label="Add a seeding destination"></div>
+    <p id="empty" class="muted">Add a vessel to calculate the stock and medium volumes per dish or well.</p>
     <div id="rows"></div>
   </section>
   <section aria-labelledby="totals-title">
-    <h2 id="totals-title">原液の必要量</h2>
+    <h2 id="totals-title">Stock Volume</h2>
     <div class="summary">
-      <div class="metric"><p class="muted">必要な原液の合計</p><output id="required">—</output></div>
-      <label>原液の手持ち量（mL・任意）<input id="available" inputmode="decimal"></label>
-      <div class="metric"><p class="muted">手持ち量との差</p><output id="balance">—</output></div>
+      <div class="metric"><p class="muted">Total stock required</p><output id="required">—</output></div>
+      <label>Available stock (mL, optional)<input id="available" inputmode="decimal"></label>
+      <div class="metric"><p class="muted">Stock balance</p><output id="balance">—</output></div>
     </div>
     <p id="total-note" class="muted"></p>
   </section>
@@ -97,7 +97,7 @@ const vessels = [
   { name: "6 well plate", wells: 6, volume: 2 },
   { name: "12 well plate", wells: 12, volume: 1 },
 ];
-const rangeError = "数値が計算できる範囲を超えています。";
+const rangeError = "A value is outside the supported calculation range.";
 
 function parseNumber(text) {
   const trimmed = text.trim();
@@ -107,11 +107,11 @@ function parseNumber(text) {
 }
 
 function measure(counts, dilution) {
-  if (counts.length !== 4 || counts.some(text => !text.trim())) throw Error("4つの大区画にそれぞれ細胞数を入力してください。");
+  if (counts.length !== 4 || counts.some(text => !text.trim())) throw Error("Enter a cell count for each of the four large squares.");
   const values = counts.map(parseNumber);
-  if (values.some(value => !Number.isSafeInteger(value) || value < 0)) throw Error("各区画の細胞数は0以上の整数で入力してください。");
+  if (values.some(value => !Number.isSafeInteger(value) || value < 0)) throw Error("Enter a non-negative whole number for each square.");
   const factor = parseNumber(dilution);
-  if (!(factor >= 1)) throw Error("希釈倍率は1以上の数値で入力してください。");
+  if (!(factor >= 1)) throw Error("Enter a dilution factor of at least 1.");
   const mean = values.reduce((sum, value) => sum + value, 0) / 4;
   const concentration = mean * 10000 * factor;
   if (!Number.isFinite(concentration)) throw Error(rangeError);
@@ -127,14 +127,14 @@ function difference(lhs, rhs) {
 
 function calculate(vessel, inputs, concentration) {
   const count = parseNumber(inputs.count);
-  if (!Number.isSafeInteger(count) || count < 1) throw Error("枚数は1以上の整数で入力してください。");
+  if (!Number.isSafeInteger(count) || count < 1) throw Error("Enter a whole number of vessels (at least 1).");
   const wells = Number(inputs.wells);
-  if (!Number.isInteger(wells) || wells < 1 || wells > vessel.wells) throw Error("使用well数をプレートの範囲内で指定してください。");
+  if (!Number.isInteger(wells) || wells < 1 || wells > vessel.wells) throw Error("Choose a number of wells within the plate capacity.");
   const target = parseNumber(inputs.target);
-  if (!Number.isSafeInteger(target) || target < 1) throw Error("1 dish・1 well あたりの目標細胞数を正の整数で入力してください。");
+  if (!Number.isSafeInteger(target) || target < 1) throw Error("Enter a positive whole number of target cells per dish or well.");
   const final = parseNumber(inputs.final);
-  if (!(final > 0)) throw Error("最終液量は0より大きい mL で入力してください。");
-  if (!(concentration > 0)) throw Error("濃度が0のため播種に必要な原液量を計算できません。");
+  if (!(final > 0)) throw Error("Enter a final volume greater than 0 mL.");
+  if (!(concentration > 0)) throw Error("Stock concentration must be greater than zero to calculate the seeding volume.");
   const units = count * wells;
   const stock = target / concentration;
   const stockTotal = stock * units;
@@ -143,11 +143,11 @@ function calculate(vessel, inputs, concentration) {
   return { units, stock, stockTotal, finalTotal, medium: difference(final, stock) };
 }
 
-const normal = new Intl.NumberFormat("ja-JP", { maximumSignificantDigits: 6 });
-const scientific = new Intl.NumberFormat("ja-JP", { notation: "scientific", maximumSignificantDigits: 6 });
+const normal = new Intl.NumberFormat("en-US", { maximumSignificantDigits: 6 });
+const scientific = new Intl.NumberFormat("en-US", { notation: "scientific", maximumSignificantDigits: 6 });
 const display = value => (value !== 0 && (Math.abs(value) < 0.0001 || Math.abs(value) >= 1e10) ? scientific : normal).format(value);
 const volume = ml => ml > 0 && ml < 1 ? display(ml * 1000) + " µL" : display(ml) + " mL";
-const mix = (stock, medium) => "原液 " + volume(stock) + (medium < 0 ? "" : " ＋ 培地 " + volume(medium));
+const mix = (stock, medium) => "Stock " + volume(stock) + (medium < 0 ? "" : " + medium " + volume(medium));
 
 const byId = id => document.getElementById(id);
 const counts = [1, 2, 3, 4].map(index => byId("count-" + index));
@@ -158,12 +158,12 @@ function addDestination(vessel, addButton) {
   const card = document.createElement("article");
   const unit = vessel.wells === 1 ? "dish" : "well";
   card.innerHTML = `
-    <div class="card-title"><h3>${vessel.name}</h3><button type="button" aria-label="${vessel.name} の播種先を削除">削除</button></div>
+    <div class="card-title"><h3>${vessel.name}</h3><button type="button" aria-label="Remove ${vessel.name} destination">Remove</button></div>
     <div class="fields">
-      <label>目標細胞数（cells/${unit}）<input name="target" placeholder="1e5"></label>
-      <label>枚数<input name="count" inputmode="numeric" value="1"></label>
-      ${vessel.wells > 1 ? '<label>使用well数 / plate<select name="wells"></select></label>' : ""}
-      <label>最終液量（mL/${unit}）<input name="final" inputmode="decimal" value="${vessel.volume}"></label>
+      <label>Target (cells/${unit})<input name="target" placeholder="1e5"></label>
+      <label>Number of vessels<input name="count" inputmode="numeric" value="1"></label>
+      ${vessel.wells > 1 ? '<label>Wells used per plate<select name="wells"></select></label>' : ""}
+      <label>Final volume (mL/${unit})<input name="final" inputmode="decimal" value="${vessel.volume}"></label>
     </div>
     <output class="row-result"></output>`;
   const cl = name => card.querySelector('[name="' + name + '"]');
@@ -203,7 +203,7 @@ function refresh() {
   try {
     measurement = measure(counts.map(input => input.value), byId("dilution").value);
     byId("concentration").textContent = display(measurement.concentration) + " cells/mL";
-    byId("measurement-note").textContent = `平均 ${display(measurement.mean)} × 希釈倍率 ${display(measurement.factor)} × 10,000`;
+    byId("measurement-note").textContent = `Mean ${display(measurement.mean)} × dilution factor ${display(measurement.factor)} × 10,000`;
   } catch (error) {
     byId("concentration").textContent = "—";
     byId("measurement-note").textContent = error.message;
@@ -219,9 +219,9 @@ function refresh() {
       const line = calculate(row.vessel, row.read(), measurement.concentration);
       required += line.stockTotal;
       finalTotal += line.finalTotal;
-      describe(row.result, `1 ${row.unit} あたり　${mix(line.stock, line.medium)}`);
-      if (line.units > 1) describe(row.result, `計 ${line.units} ${row.unit}　${mix(line.stockTotal, line.medium * line.units)}`);
-      if (line.medium < 0) describe(row.result, "必要な原液量が最終液量を超えています。", true);
+      describe(row.result, `Per ${row.unit}: ${mix(line.stock, line.medium)}`);
+      if (line.units > 1) describe(row.result, `Total for ${display(line.units)} ${row.unit === "dish" ? "dishes" : "wells"}: ${mix(line.stockTotal, line.medium * line.units)}`);
+      if (line.medium < 0) describe(row.result, "The required stock volume exceeds the final volume.", true);
     } catch (error) {
       valid = false;
       describe(row.result, error.message);
@@ -232,19 +232,19 @@ function refresh() {
   const rawAvailable = byId("available").value;
   const available = rawAvailable.trim() ? parseNumber(rawAvailable) : null;
   if (available !== null && !(available >= 0)) {
-    note = "原液の手持ち量は0以上の mL で入力してください。";
+    note = "Enter the available stock volume as a non-negative number in mL.";
     valid = false;
   } else if (!Number.isFinite(required) || !Number.isFinite(finalTotal)) {
     note = rangeError;
     valid = false;
   } else if (!valid && measurement && rows.size) {
-    note = "各播種先の入力を確認してください。";
+    note = "Check the inputs for each seeding destination.";
   }
   const showTotal = valid && rows.size > 0;
   byId("required").textContent = showTotal ? volume(required) : "—";
   const balance = showTotal && available !== null ? difference(available, required) : null;
-  byId("balance").textContent = balance === null ? "—" : balance === 0 ? "必要量と一致" :
-    (balance < 0 ? "不足 " : "残り ") + volume(Math.abs(balance));
+  byId("balance").textContent = balance === null ? "—" : balance === 0 ? "Exactly enough" :
+    (balance < 0 ? "Short by " : "Remaining: ") + volume(Math.abs(balance));
   byId("balance").classList.toggle("warning", balance < 0);
   byId("total-note").textContent = note;
   print.disabled = !valid;
@@ -253,7 +253,7 @@ function refresh() {
 for (const vessel of vessels) {
   const button = document.createElement("button");
   button.type = "button";
-  button.textContent = "＋ " + vessel.name;
+  button.textContent = "+ " + vessel.name;
   button.addEventListener("click", () => addDestination(vessel, button));
   byId("vessels").append(button);
 }
