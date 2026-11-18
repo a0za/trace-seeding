@@ -2,19 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#153b2e">
 <title>Cell Seeding Calculator | TЯace</title>
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACPTkDJAAAFR0lEQVRYCe1Xe1CUVRT/7YNHIu+HhCgIiAGiqIMKaJo51DA1hlMzZQ9smrSHTUgNNZoxRYw19UcO2mQ2WSg5jqU4RTHJICkgBKYghoDyhmRhWRYEZJ+de9fd+b6PzzUbJ//x+2fvPffcc849v9+59yxw77vLGVDczH/QsvkzoFZsVlqxxgrMVEDhcjNdObkVViMZ77UoUAaTda+mprFfTk82gKCkuBcUStUXtOght+l2ZXSAMavF/JrmzMUC6V6VVMCcK5Wq78i5q3Ttv86ZLYVCmT4tNKB9rGegXmhHlAGWdoVaeUXu5EF+AdDqdTCbzcL9tzXmmTBZIoVwKEUWCHOpc4XCFuOu7bnY8Fi6SP12J9w2+RDuUwsnjHCw+XOIszZuxvKEJSitOgXv6Z6YPs0DDyetQGJ8AuaEzkaAjx9cXVwwaTBgcHgIbd2dqL1Qj7LqCoxNjDvs2AfcB/ChfS4KwMZ2+5Lt99tjhxE5Owy1jfVYEhuPuh9LoNFqceZ8HcprqqAZGuTO3d3cEEgwRYdH4N1NW/DJ29vx8b7dKCg6IjLIfAgFogCkpfbE2keR/14e8g9+gzkzQ5H14ma8tC0LledqhTZkx6sSk7Av9zMMDGnx66kyh47Uh5gDDjXboKi0BCs2rMO+I4WImxsDlVIJhVKCkWSPfaokPSXpx0XNs4tkf0UZkNPo7OvhYoZtv3aQn0o7rCMIzqK1sw0DBAfD3waBP4cgeVEivIgv/doBdPR2y5l1yG4ZANP09/FFbNRcWCwWLH0qDauXJhMJF2LlkmUI8GUkdKUgJjGo03ES5n35OX6vrUbx3oO4TnJnn9MA1Co1cjOz8XTaOnT19cLHyxvH9+xHwfEfUPjTUVzp6oTJbHLYZ/pRYeFIWZyIItKbmLzOq8GhIDNwGsC2V95EasoqrMl4Eu093ZRmdzz7eDrWp6YhZ0sWcUKF4RE9nZIgcHXlAdIbwGHZXbgfh4qPcXhk/DpETgNgafX0mE4ltQO/VZSjoaUJxeWlOEAZYB+7B8JDZiEkOBizgkOwIDoWCTGxPP2sfP/N5zQA3cgwv1QqztbgkZUP8TJk5JJ+Y+PjaGprxcmaSgzoBkWwSHWlc6cBXGxpxtaMTThdV43sT3MJhi6eER9PL7jQ7WcymaAfHYH+2ijPwNrkBzlB73N3RyCRc+vOHL4mdSqci4o6OHlBB13FYUIFxvjdO/J4WY1fn0DX370Y0g/DYDAS+9Xw9fJBKKXf08MD55oa8dXhA6hrbMCenJ0wGo145q1XheZAFOm8WtUQbhc6zQBTKv+jil5ACy53tuP7n4/xF9HLw5Pf/8YbGejVXEVz22V+WjciY2rKaoTTzakfHbX7uenvLQNgOxnTWzrakLlxE9QqFRpbL/Gy1On1mBEQiPh5MVQd6zkpYyOjoSP9+kt/Sd812SBEAdjaKBEqfNP45AQ9Rufxeu42LIqZz6/X0OD74c24oHaBwWhAn6YfNfV/oqG5iQf4UeY78PP2meKU+RAKRQGQ615ajBIqsPGugq+RTzxgfCg5fZIHc/TELxgdu+ZQZcRkZbl84WLkkfOIWWF4PvsNx7p9cMOHfSrOUlBK/Pv03HzgWBUMQoKC8RyledXSJDwQMRcMa1YFRroJXSkLKoJmfGKCn/4E9Q6Hios4dAITfGiBNUdTecHRD4jy7awlExpir1yQnz+HQK1WU0UYOO6DuiGh2pSxXEsmCoDtsDelU3bfAYHFYs6QdsZTumLWtbLulR7+VIrujnTG/OQW88tS5+xMUzJgP+j/9cfE7u/e713LwD+1WwqY6b2vDAAAAABJRU5ErkJggg==">
 <style>
-:root { font: 16px/1.55 -apple-system, BlinkMacSystemFont, sans-serif; color: #183029; background: #edf1ed; }
+:root { font: 16px/1.55 -apple-system, BlinkMacSystemFont, sans-serif; -webkit-text-size-adjust: 100%; color: #183029; background: #edf1ed; }
 * { box-sizing: border-box; }
 body { margin: 0; }
 header { background: #153b2e; color: #fff; }
-.shell { max-width: 1040px; margin: auto; padding: 24px clamp(16px, 4vw, 40px); }
-header .shell { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.shell { max-width: 1040px; margin: auto; --gutter: clamp(14px, 4vw, 40px); padding: 24px var(--gutter);
+  padding-left: max(var(--gutter), env(safe-area-inset-left));
+  padding-right: max(var(--gutter), env(safe-area-inset-right)); }
+header .shell { padding-top: calc(24px + env(safe-area-inset-top)); display: flex; justify-content: space-between; gap: 16px; align-items: center; }
 .brand { display: block; color: #c4e4d5; font-weight: 700; letter-spacing: .08em; font-size: .85rem; }
 h1 { font-size: clamp(1.25rem, 4vw, 1.95rem); margin: 3px 0 0; }
-main.shell { display: grid; gap: 16px; }
+main.shell { display: grid; gap: 16px; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 section { background: white; border: 1px solid #d5dfd7; border-radius: 16px; padding: clamp(14px, 3vw, 25px); min-width: 0; }
 h2, h3, p { margin: 0; }
 h2 { font-size: 1.1rem; margin-bottom: 8px; }
@@ -42,12 +45,37 @@ article { padding: 12px; border: 1px solid #d9e3db; border-radius: 10px; break-i
 .row-result { display: grid; margin-top: 8px; gap: 4px; font-size: .9rem; }
 .warning { color: #984b19; }
 .summary { grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); align-items: start; }
-@media (max-width: 560px) { .measurement { grid-template-columns: 1fr; } header .shell { align-items: start; } }
+@media screen and (max-width: 600px), screen and (max-width: 950px) and (pointer: coarse) {
+  header .shell { gap: 10px; padding-top: calc(14px + env(safe-area-inset-top)); padding-bottom: 14px; }
+  h1 { font-size: 1.25rem; line-height: 1.2; }
+  main.shell { gap: 12px; padding-top: 12px; }
+  section { padding: 14px; }
+  input, select, button { min-height: 44px; }
+  input, select { font-size: 16px; }
+  select {
+    appearance: none;
+    padding-right: 30px;
+    background:
+      linear-gradient(45deg, transparent 50%, #496456 50%) right 17px center / 5px 5px no-repeat,
+      linear-gradient(135deg, #496456 50%, transparent 50%) right 12px center / 5px 5px no-repeat,
+      #fafcf9;
+  }
+  button { padding: 6px 10px; font-size: .875rem; }
+  .measurement { grid-template-columns: 1fr; gap: 10px; }
+  .counts { gap: 6px; }
+  .counts input { padding-inline: 6px; text-align: center; }
+  .measurement > label { max-width: 140px; }
+  .actions, .fields, .summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .actions button { white-space: normal; line-height: 1.25; }
+  .metric { padding: 10px 12px; }
+  .summary > label { grid-column: 1 / -1; grid-row: 1; }
+  .row-result { padding-top: 8px; border-top: 1px solid #d9e3db; }
+}
 @media print {
   :root, header { background: white; color: black; }
   .brand { color: black; }
   button, .actions, #empty { display: none !important; }
-  .shell { max-width: none; padding: 8px 0; }
+  .shell, header .shell, main.shell { max-width: none; padding: 8px 0; }
   section { border-color: #aaa; padding: 10px; }
   input, select, .metric { background: white; color: black; }
   main.shell { gap: 10px; }
