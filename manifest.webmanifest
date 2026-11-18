@@ -1,0 +1,10 @@
+{
+  "name": "TЯace Cell Seeding Calculator",
+  "short_name": "TЯace",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7f4",
+  "theme_color": "#f8faf8",
+  "icons": [{ "src": "./app-icon.png", "sizes": "512x512", "type": "image/png" }]
+}
