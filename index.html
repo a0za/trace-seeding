@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>細胞濃度・播種量の計算 | TЯace</title>
+<style>
+:root { font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif; color: #183029; background: #edf1ed; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+header { background: #153b2e; color: #fff; }
+.shell { max-width: 1040px; margin: auto; padding: 24px clamp(16px, 4vw, 40px); }
+header .shell { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.brand { display: block; color: #c4e4d5; font-weight: 700; letter-spacing: .08em; font-size: .85rem; }
+h1 { font-size: clamp(1.25rem, 4vw, 1.95rem); margin: 3px 0 0; }
+main.shell { display: grid; gap: 16px; }
+section { background: white; border: 1px solid #d5dfd7; border-radius: 16px; padding: clamp(14px, 3vw, 25px); min-width: 0; }
+h2, h3, p { margin: 0; }
+h2 { font-size: 1.1rem; margin-bottom: 8px; }
+h3 { font-size: 1rem; }
+.muted, label { color: #496456; font-size: .85rem; }
+.fields, .measurement, .summary { display: grid; gap: 14px; }
+.measurement { grid-template-columns: minmax(0, 2fr) minmax(170px, 1fr); margin-top: 12px; }
+.fields { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+.counts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+label { display: grid; gap: 5px; align-content: start; }
+input, select, button { font: inherit; }
+input, select { width: 100%; min-width: 0; color: #183029; background: #fafcf9; border: 1px solid #bdccc1; border-radius: 8px; padding: 7px 9px; }
+button { cursor: pointer; border: 1px solid #b5c9bb; border-radius: 8px; background: #f2f8f3; color: #153b2e; padding: 7px 12px; white-space: nowrap; }
+button:hover:not(:disabled) { background: #dfeee3; }
+button:disabled { opacity: .55; cursor: default; }
+:focus-visible { outline: 2px solid #397e60; outline-offset: 2px; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+.metric { padding: 12px 16px; border-radius: 10px; background: #edf5ee; }
+output { font-variant-numeric: tabular-nums; }
+.metric output { display: block; font-size: clamp(1.18rem, 3vw, 1.6rem); font-weight: 700; overflow-wrap: anywhere; }
+#measurement-note { margin-top: 8px; }
+#rows { display: grid; gap: 10px; }
+article { padding: 12px; border: 1px solid #d9e3db; border-radius: 10px; break-inside: avoid; }
+.card-title { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; }
+.row-result { display: grid; margin-top: 8px; gap: 4px; font-size: .9rem; }
+.warning { color: #984b19; }
+.summary { grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); align-items: start; }
+@media (max-width: 560px) { .measurement { grid-template-columns: 1fr; } header .shell { align-items: start; } }
+@media print {
+  :root, header { background: white; color: black; }
+  .brand { color: black; }
+  button, .actions, #empty { display: none !important; }
+  .shell { max-width: none; padding: 8px 0; }
+  section { border-color: #aaa; padding: 10px; }
+  input, select, .metric { background: white; color: black; }
+  main.shell { gap: 10px; }
+}
+</style>
+</head>
+<body>
+<header><div class="shell"><div><span class="brand">TЯace</span><h1>細胞濃度・播種量の計算</h1></div><button id="print" type="button" disabled>印刷 / PDF</button></div></header>
+<main class="shell">
+  <section aria-labelledby="measurement-title">
+    <h2 id="measurement-title">細胞濃度</h2>
+    <p class="muted">ノイバウエル計算盤の大区画（1 mm²、深さ 0.1 mm）</p>
+    <div class="measurement">
+      <div class="counts">
+        <label>区画 1<input id="count-1" inputmode="numeric" autocomplete="off"></label>
+        <label>区画 2<input id="count-2" inputmode="numeric" autocomplete="off"></label>
+        <label>区画 3<input id="count-3" inputmode="numeric" autocomplete="off"></label>
+        <label>区画 4<input id="count-4" inputmode="numeric" autocomplete="off"></label>
+      </div>
+      <label>希釈倍率（×）<input id="dilution" inputmode="decimal" value="2"></label>
+      <div class="metric"><p class="muted">細胞懸濁液（原液）の濃度</p><output id="concentration">—</output></div>
+    </div>
+    <p id="measurement-note" class="muted"></p>
+  </section>
+  <section aria-labelledby="destinations-title">
+    <h2 id="destinations-title">播種先</h2>
+    <div id="vessels" class="actions" aria-label="播種先を追加"></div>
+    <p id="empty" class="muted">容器を選ぶと、1 dish・1 well あたりの原液量と培地量を計算します。</p>
+    <div id="rows"></div>
+  </section>
+  <section aria-labelledby="totals-title">
+    <h2 id="totals-title">原液の必要量</h2>
+    <div class="summary">
+      <div class="metric"><p class="muted">必要な原液の合計</p><output id="required">—</output></div>
+      <label>原液の手持ち量（mL・任意）<input id="available" inputmode="decimal"></label>
+      <div class="metric"><p class="muted">手持ち量との差</p><output id="balance">—</output></div>
+    </div>
+    <p id="total-note" class="muted"></p>
+  </section>
+</main>
+<script>
+"use strict";
+
+const vessels = [
+  { name: "35 mm dish", wells: 1, volume: 2 },
+  { name: "60 mm dish", wells: 1, volume: 5 },
+  { name: "100 mm dish", wells: 1, volume: 10 },
+  { name: "6 well plate", wells: 6, volume: 2 },
+  { name: "12 well plate", wells: 12, volume: 1 },
+];
+const rangeError = "数値が計算できる範囲を超えています。";
+
+function parseNumber(text) {
+  const trimmed = text.trim();
+  if (!/^[+-]?(?:(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?$/.test(trimmed)) return NaN;
+  const value = Number(trimmed.replaceAll(",", ""));
+  return Number.isFinite(value) ? value : NaN;
+}
+
+function measure(counts, dilution) {
+  if (counts.length !== 4 || counts.some(text => !text.trim())) throw Error("4つの大区画にそれぞれ細胞数を入力してください。");
+  const values = counts.map(parseNumber);
+  if (values.some(value => !Number.isSafeInteger(value) || value < 0)) throw Error("各区画の細胞数は0以上の整数で入力してください。");
+  const factor = parseNumber(dilution);
+  if (!(factor >= 1)) throw Error("希釈倍率は1以上の数値で入力してください。");
+  const mean = values.reduce((sum, value) => sum + value, 0) / 4;
+  const concentration = mean * 10000 * factor;
+  if (!Number.isFinite(concentration)) throw Error(rangeError);
+  return { mean, factor, concentration };
+}
+
+function difference(lhs, rhs) {
+  const delta = lhs - rhs;
+  const exponent = Math.floor(Math.log2(Math.max(Math.abs(lhs), Math.abs(rhs))));
+  const ulp = Math.max(Number.MIN_VALUE, 2 ** (exponent - 52));
+  return Math.abs(delta) <= 4 * ulp ? 0 : delta;
+}
+
+function calculate(vessel, inputs, concentration) {
+  const count = parseNumber(inputs.count);
+  if (!Number.isSafeInteger(count) || count < 1) throw Error("枚数は1以上の整数で入力してください。");
+  const wells = Number(inputs.wells);
+  if (!Number.isInteger(wells) || wells < 1 || wells > vessel.wells) throw Error("使用well数をプレートの範囲内で指定してください。");
+  const target = parseNumber(inputs.target);
+  if (!Number.isSafeInteger(target) || target < 1) throw Error("1 dish・1 well あたりの目標細胞数を正の整数で入力してください。");
+  const final = parseNumber(inputs.final);
+  if (!(final > 0)) throw Error("最終液量は0より大きい mL で入力してください。");
+  if (!(concentration > 0)) throw Error("濃度が0のため播種に必要な原液量を計算できません。");
+  const units = count * wells;
+  const stock = target / concentration;
+  const stockTotal = stock * units;
+  const finalTotal = final * units;
+  if (!Number.isSafeInteger(units) || !(stock > 0) || !Number.isFinite(stockTotal) || !Number.isFinite(finalTotal)) throw Error(rangeError);
+  return { units, stock, stockTotal, finalTotal, medium: difference(final, stock) };
+}
+
+const normal = new Intl.NumberFormat("ja-JP", { maximumSignificantDigits: 6 });
+const scientific = new Intl.NumberFormat("ja-JP", { notation: "scientific", maximumSignificantDigits: 6 });
+const display = value => (value !== 0 && (Math.abs(value) < 0.0001 || Math.abs(value) >= 1e10) ? scientific : normal).format(value);
+const volume = ml => ml > 0 && ml < 1 ? display(ml * 1000) + " µL" : display(ml) + " mL";
+const mix = (stock, medium) => "原液 " + volume(stock) + (medium < 0 ? "" : " ＋ 培地 " + volume(medium));
+
+const byId = id => document.getElementById(id);
+const counts = [1, 2, 3, 4].map(index => byId("count-" + index));
+const rows = new Map();
+const print = byId("print");
+
+function addDestination(vessel, addButton) {
+  const card = document.createElement("article");
+  const unit = vessel.wells === 1 ? "dish" : "well";
+  card.innerHTML = `
+    <div class="card-title"><h3>${vessel.name}</h3><button type="button" aria-label="${vessel.name} の播種先を削除">削除</button></div>
+    <div class="fields">
+      <label>目標細胞数（cells/${unit}）<input name="target" placeholder="1e5"></label>
+      <label>枚数<input name="count" inputmode="numeric" value="1"></label>
+      ${vessel.wells > 1 ? '<label>使用well数 / plate<select name="wells"></select></label>' : ""}
+      <label>最終液量（mL/${unit}）<input name="final" inputmode="decimal" value="${vessel.volume}"></label>
+    </div>
+    <output class="row-result"></output>`;
+  const cl = name => card.querySelector('[name="' + name + '"]');
+  const target = cl("target");
+  const wells = cl("wells");
+  if (wells) {
+    for (let value = 1; value <= vessel.wells; value++) wells.add(new Option(value, value));
+    wells.value = String(vessel.wells);
+  }
+  const count = cl("count");
+  const final = cl("final");
+  rows.set(card, {
+    vessel, unit, result: card.querySelector("output"),
+    read: () => ({ target: target.value, count: count.value, wells: wells?.value ?? "1", final: final.value }),
+  });
+  card.querySelector("button").addEventListener("click", () => {
+    rows.delete(card);
+    card.remove();
+    refresh();
+    addButton.focus();
+  });
+  byId("rows").append(card);
+  refresh();
+  target.focus();
+}
+
+function describe(result, text, warning = false) {
+  const line = document.createElement("span");
+  line.textContent = text;
+  if (warning) line.className = "warning";
+  result.append(line);
+}
+
+function refresh() {
+  byId("empty").hidden = rows.size > 0;
+  let measurement;
+  try {
+    measurement = measure(counts.map(input => input.value), byId("dilution").value);
+    byId("concentration").textContent = display(measurement.concentration) + " cells/mL";
+    byId("measurement-note").textContent = `平均 ${display(measurement.mean)} × 希釈倍率 ${display(measurement.factor)} × 10,000`;
+  } catch (error) {
+    byId("concentration").textContent = "—";
+    byId("measurement-note").textContent = error.message;
+  }
+
+  let valid = Boolean(measurement);
+  let required = 0;
+  let finalTotal = 0;
+  for (const row of rows.values()) {
+    row.result.replaceChildren();
+    if (!measurement) continue;
+    try {
+      const line = calculate(row.vessel, row.read(), measurement.concentration);
+      required += line.stockTotal;
+      finalTotal += line.finalTotal;
+      describe(row.result, `1 ${row.unit} あたり　${mix(line.stock, line.medium)}`);
+      if (line.units > 1) describe(row.result, `計 ${line.units} ${row.unit}　${mix(line.stockTotal, line.medium * line.units)}`);
+      if (line.medium < 0) describe(row.result, "必要な原液量が最終液量を超えています。", true);
+    } catch (error) {
+      valid = false;
+      describe(row.result, error.message);
+    }
+  }
+
+  let note = "";
+  const rawAvailable = byId("available").value;
+  const available = rawAvailable.trim() ? parseNumber(rawAvailable) : null;
+  if (available !== null && !(available >= 0)) {
+    note = "原液の手持ち量は0以上の mL で入力してください。";
+    valid = false;
+  } else if (!Number.isFinite(required) || !Number.isFinite(finalTotal)) {
+    note = rangeError;
+    valid = false;
+  } else if (!valid && measurement && rows.size) {
+    note = "各播種先の入力を確認してください。";
+  }
+  const showTotal = valid && rows.size > 0;
+  byId("required").textContent = showTotal ? volume(required) : "—";
+  const balance = showTotal && available !== null ? difference(available, required) : null;
+  byId("balance").textContent = balance === null ? "—" : balance === 0 ? "必要量と一致" :
+    (balance < 0 ? "不足 " : "残り ") + volume(Math.abs(balance));
+  byId("balance").classList.toggle("warning", balance < 0);
+  byId("total-note").textContent = note;
+  print.disabled = !valid;
+}
+
+for (const vessel of vessels) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = "＋ " + vessel.name;
+  button.addEventListener("click", () => addDestination(vessel, button));
+  byId("vessels").append(button);
+}
+document.querySelector("main").addEventListener("input", refresh);
+print.addEventListener("click", () => window.print());
+refresh();
+</script>
+</body>
+</html>
